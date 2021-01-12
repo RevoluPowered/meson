@@ -32,6 +32,8 @@ from .envconfig import (
     Properties, known_cpu_families, get_env_var_pair,
     CMakeVariables,
 )
+
+from msvc_detector import MSVCDetector
 from . import compilers
 from .compilers import (
     Compiler,
@@ -677,6 +679,7 @@ class Environment:
             # Search for icl before cl, since Intel "helpfully" provides a
             # cl.exe that returns *exactly the same thing* that microsofts
             # cl.exe does, and if icl is present, it's almost certainly what
+
             # you want.
             self.default_c = ['icl', 'cl', 'cc', 'gcc', 'clang', 'clang-cl', 'pgcc']
             # There is currently no pgc++ for Windows, only for  Mac and Linux.
@@ -686,6 +689,13 @@ class Environment:
             self.default_objc = ['cc', 'gcc']
             self.default_objcpp = ['c++', 'g++']
             self.default_cs = ['csc', 'mcs']
+
+            self.detector = MSVCDetector()
+
+            if not self.detector.environment_has_msvc_configured():
+                self.detector.configure_msvc_environment()
+
+
         else:
             if platform.machine().lower() == 'e2k':
                 # There are no objc or objc++ compilers for Elbrus,
